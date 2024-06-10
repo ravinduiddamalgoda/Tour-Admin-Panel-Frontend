@@ -5,6 +5,11 @@ import instance from '../api';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Navbar from '../Components/Navbar';
+import BgImage from '../Assets/bg.png';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+
 
 const Inquire = () => {
   const navigate = useNavigate();
@@ -39,13 +44,13 @@ const Inquire = () => {
 
   const validationSchema = Yup.object({
     firstName: Yup.string().required('First Name is required'),
-    lastName: Yup.string().nullable(),
+    lastName: Yup.string().required('First Name is required'),
     email: Yup.string().email('Invalid email format').required('Email is required'),
     mobile: Yup.string().required('Mobile number is required'),
     arrivalDate: Yup.date().required('Arrival Date is required'),
     departureDate: Yup.date().required('Departure Date is required'),
     numAdults: Yup.number().min(1, 'At least 1 adult is required').required('Number of Adults is required'),
-    numChildren: Yup.number().min(0, 'Number of Children cannot be negative').required('Number of Children is required'),
+    numChildren: Yup.number().min(0, 'Number of Children cannot be negative').nullable(),
     country: Yup.string().required('Country is required'),
     message: Yup.string().required('Message is required')
   });
@@ -69,7 +74,9 @@ const Inquire = () => {
     setSubmitting(false);
   };
 
+
   const handlePwsSubmit = async (e) => {
+
     e.preventDefault();
     const data = {
       ...oldForm,
@@ -79,18 +86,23 @@ const Inquire = () => {
     try {
       const res = await instance.post('/inquiry/addInquiryNewUser', data);
       toast.success('User Registered Successfully and Inquiry Added!');
+
     } catch (err) {
       console.log(err);
       toast.error('Failed to add User and Inquiry');
     }
     setShowModal(false);
-  }
+  };
+  
 
   return (
     <>
       <ToastContainer />
+
+      <Navbar buttonState={'LOGIN'} buttonLoc={'/login'} />
+      <img src={BgImage} alt="Background" className="absolute inset-0 w-full h-full z-0" style={{ objectFit: 'cover', objectPosition: 'center', zIndex: '-1', position: 'fixed' }} />
       <div className="max-w-md mx-auto my-8 p-6 rounded-md border-2 border-customYellow">
-        <div className="max-w-md mx-auto my-8 p-6 bg-gray-100 rounded-md">
+        <div className="max-w-md mx-auto my-2 p-6 bg-gray-100 rounded-md">
           <h2 className="text-2xl font-semibold flex justify-center mb-4">INQUIRY NOW</h2>
           <Formik
             initialValues={initialValues}
