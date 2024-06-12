@@ -15,8 +15,7 @@ const initialValues = {
   adultsCount: "",
   childrenCount: "",
   description: "",
-  specialNotes: "",
-  totalDistance: "",
+  specialNotes: ""
 };
 
 const validationSchema = Yup.object().shape({
@@ -28,8 +27,7 @@ const validationSchema = Yup.object().shape({
   adultsCount: Yup.number().required("Number of adults is required"),
   childrenCount: Yup.number().required("Number of children is required"),
   description: Yup.string().required("Description is required"),
-  specialNotes: Yup.string().required("Special notes are required"),
-  totalDistance: Yup.number().required("Total distance is required"),
+  specialNotes: Yup.string().required("Special notes are required")
 });
 
 const TourManage = () => {
@@ -90,8 +88,7 @@ const TourManage = () => {
         AdultsCount: adultsCount,
         ChildrenCount: childrenCount,
         Description: description,
-        SpecialNotes: specialNotes,
-        TotalDistance: totalDistance
+        SpecialNotes: specialNotes
       });
       
       toast.success("Tour created successfully");
@@ -110,7 +107,7 @@ const TourManage = () => {
       <div className="flex flex-row">
         <StaffSideBar />
         <div className="w-full p-4">
-          <button className="btn" onClick={() => setShowModal(true)}>Create Tour</button>
+          {/* <button className="btn" onClick={() => setShowModal(true)}>Create Tour</button> */}
           <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
@@ -118,8 +115,8 @@ const TourManage = () => {
         >
           {({ isSubmitting }) => (
             <Form>
-              <div className={`modal ${showModal ? 'modal-open' : ''}`}>
-                <div className="modal-box">
+              <div className={` `}>
+                <div className=" ">
                   <h1 className="text-2xl font-bold mb-4">Create Tour</h1>
                   <div className="mb-4">
                     <label htmlFor="customerID" className="block text-sm font-medium text-gray-700">Select Customer:</label>
@@ -178,19 +175,19 @@ const TourManage = () => {
                     <Field as="textarea" name="specialNotes" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
                     <ErrorMessage name="specialNotes" component="div" className="text-red-500 text-sm" />
                   </div>
-                  <div className="mb-4">
+                  {/* <div className="mb-4">
                     <label htmlFor="totalDistance" className="block text-sm font-medium text-gray-700">Total Distance:</label>
                     <Field type="number" name="totalDistance" className="mt-1 p-2 w-full border border-gray-300 rounded-md bg-white" />
                     <ErrorMessage name="totalDistance" component="div" className="text-red-500 text-sm" />
-                  </div>
+                  </div> */}
                   {/* Submit and cancel buttons */}
-                  <div className="modal-action">
+                  <div className=" ">
                     <button type="submit" disabled={isSubmitting} className="btn btn-primary" >
                       {isSubmitting ? "Submitting..." : "Submit"}
                     </button>
-                    <button className="btn btn-danger" onClick={() => setShowModal(false)}>
+                    {/* <button className="btn btn-danger" onClick={() => setShowModal(false)}>
                       Cancel
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               </div>
@@ -198,7 +195,7 @@ const TourManage = () => {
           )}
         </Formik>
           {/* Component to display tours */}
-          <TourList tours={tours} />
+          {/* <TourList tours={tours} /> */}
         </div>
       </div>
     </>
