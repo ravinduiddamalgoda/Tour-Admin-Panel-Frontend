@@ -11,7 +11,7 @@ const PreviousTrips = () => {
 
     const fetchPreviousTrips = async () => {
         try {
-            const response = await instance.get('/trip/getPreviousTrips');
+            const response = await instance.get('/trip/getPreviousTripsAll');
             setPreviousTrips(response.data);
         } catch (error) {
             console.error('Error fetching previous trips:', error);

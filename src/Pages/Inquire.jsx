@@ -24,7 +24,7 @@ const Inquire = () => {
     arrivalDate: '',
     departureDate: '',
     numAdults: '',
-    numChildren: '',
+    numChildren: '0',
     message: '',
     password: ''
   });

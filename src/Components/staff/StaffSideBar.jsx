@@ -63,10 +63,10 @@ const StaffSideBar = ({ activeItem }) => {
         <div className="flex flex-col items-center">
           
 
-          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "chat" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
-            <button onClick={handleLinkClick('chat')} className='flex items-center w-full'>
+          <div className={`mt-6 border border-[#DADADA] w-[240px] h-[60px] flex items-center ${activeLink === "Inquiry" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
+            <button onClick={handleLinkClick('Inquiry')} className='flex items-center w-full'>
               <div className='p-3'><ChatIcon /></div>
-              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Chat</h1>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Inquiry</h1>
             </button>
           </div>
 
