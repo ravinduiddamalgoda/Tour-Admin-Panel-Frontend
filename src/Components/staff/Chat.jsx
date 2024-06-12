@@ -37,7 +37,7 @@ const Chat = ({ inquiryID }) => {
       toast.error('User not authenticated');
       return;
     }
-    if(newMessage = ''){
+    if(newMessage === ''){
       toast.error('Enter a Message to send');
       return;
     }
