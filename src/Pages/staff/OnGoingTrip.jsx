@@ -221,15 +221,17 @@ const OnGoingTrip = () => {
                                             value={status}
                                             onChange={(e) => setStatus(e.target.value)}
                                             className="mr-2 border bg-white rounded p-1"
-                                        >
+                                        >   
                                             <option value="">Select Status</option>
-                                            <option value="Cancelled">Cancelled</option>
-                                            <option value="Started">Started</option>
-                                            <option value="Completed">Completed</option>
+                                            {trip.Status === 'end' && <option value="close">Close</option>}
+                                            {trip.Status === 'Active' ? <option value="end">End</option> : null}
+                                            {/* <option value="end">End</option>
+                                            <option value="close">Close</option> */}
+                                            {/* <option value="Completed">Completed</option> */}
                                         </select>
                                         <button
                                             onClick={() => handleStatusChange(trip.TripID)}
-                                            className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
+                                            className={`bg-blue-500 text-white px-2 py-1 rounded mr-2 ${trip.Status === 'Active'|| trip.Status === 'Pending'  ? 'cursor-not-allowed' : ''}`}
                                         >
                                             Update Status
                                         </button>
@@ -277,9 +279,9 @@ const OnGoingTrip = () => {
                                 required
                             >
                                 <option value="">Select Payment Type</option>
-                                <option value="Bank Payment">Bank Payment</option>
-                                <option value="Cash">Cash</option>
-                                <option value="Online Transfer">Online Transfer</option>
+                                <option value="Advanced">Advance Payment</option>
+                                <option value="Balance">Balance Payment</option>
+                                <option value="Full">Full Payment</option>
                             </select>
                         </div>
                         <div className="mb-4">

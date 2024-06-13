@@ -98,8 +98,8 @@ const InquiryPage = () => {
       {showChatModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-md p-4 w-full max-w-lg h-3/4 overflow-y-auto">
-            <button className="absolute top-4 right-4 text-red-700 text-3xl font-bold" onClick={() => setShowChatModal(false)}>
-              X
+            <button className="absolute top-10 right-56 text-black text-3xl font-bold" onClick={() => setShowChatModal(false)}>
+              CLOSE X
             </button>
             <Chat inquiryID={selectedInquiryID} />
           </div>
