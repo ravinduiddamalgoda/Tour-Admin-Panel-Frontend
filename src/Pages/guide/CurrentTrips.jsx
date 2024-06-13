@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminNavBar from '../../Components/guide/Navbar';
 import instance from '../../api';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Divider from '@mui/material/Divider';
-import { GoogleMap, LoadScript, Autocomplete, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
+import Swal from 'sweetalert2';
+import AutocompleteInput from '../../Components/guide/AutocompleteInput';
 
 const Tab = ({ label, isActive, onClick }) => {
     return (
@@ -17,101 +18,258 @@ const Tab = ({ label, isActive, onClick }) => {
     );
 };
 
-const libraries = ['places'];
 
 const CurrentTrips = () => {
     const [currentUser, setCurrentUser] = useState(null);
+    const [guideID, setGuideID] = useState('');
     const [allocatedTrips, setAllocatedTrips] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [selectedTrip, setSelectedTrip] = useState(null);
+    const [selectedTrip, setSelectedTrip] = useState([]);
     const [showNestedModal, setShowNestedModal] = useState(false);
     const [currentTab, setCurrentTab] = useState('dailyDistance');
-    const [startLocation, setStartLocation] = useState('');
-    const [endLocation, setEndLocation] = useState('');
     const [tripDays, setTripDays] = useState([]);
-    const [tripPrice, setTripPrice] = useState(null);
-    const [map, setMap] = useState(null);
-    const [directionsResponse, setDirectionsResponse] = useState(null);
     const [selectedDay, setSelectedDay] = useState(null);
+    const [trackPoints, setTrackPoints] = useState([]);
+    const [totalDistance, setTotalDistance] = useState(null);
 
-    const startAutocomplete = useRef(null);
-    const endAutocomplete = useRef(null);
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [trackPoints, setTrackPoints] = useState([{ start: '', end: '' }]);
+    useEffect(() => {
+        fetchTotalDistance();
+    }, [selectedTrip]);
+
+    const fetchTotalDistance = async () => {
+        try {
+            const response = await fetch(`http://localhost:3001/guide/total-distance?tripId=${selectedTrip.TripID}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch total distance');
+            }
+            const data = await response.json();
+            setTotalDistance(data.totalDistance);
+        } catch (error) {
+            console.error('Error fetching total distance:', error);
+        }
+    };
+
 
     const handleAddTrackPoint = () => {
-        const newTrackPoint = { start: '', end: '' };
-        const updatedTrackPoints = [...trackPoints, newTrackPoint];
-        setTrackPoints(updatedTrackPoints);
+        setTrackPoints([...trackPoints, { id: trackPoints.length, location1: {}, location2: {}, distance: 0, submitted: false }]);
     };
 
-    const handleDeleteTrackPoint = (index) => {
-        const updatedTrackPoints = [...trackPoints];
-        updatedTrackPoints.splice(index, 1);
-        setTrackPoints(updatedTrackPoints);
-    };
+    const handleDeleteTrackPoint = async (index) => {
+        const point = trackPoints[index];
 
-    const handleLoad = () => {
-        setIsLoaded(true);
-    };
+        // Check if location1 and location2 are empty
+        if (!point.location1 || !point.location1.name || !point.location2 || !point.location2.name) {
+            // Directly remove from frontend state if locations are empty
+            const updatedTrackPoints = trackPoints.filter((_, i) => i !== index);
 
-    const onStartPlaceChanged = () => {
-        if (startAutocomplete.current) {
-            const place = startAutocomplete.current.getPlace();
-            if (place && place.formatted_address) {
-                setStartLocation(place.formatted_address);
-            } else {
-                toast.error('Invalid starting point');
-            }
-        }
-    };
+            // Refresh the IDs of the remaining trackpoints
+            const refreshedTrackPoints = updatedTrackPoints.map((point, i) => {
+                return {
+                    ...point,
+                    id: i
+                };
+            });
 
-    const onEndPlaceChanged = () => {
-        if (endAutocomplete.current) {
-            const place = endAutocomplete.current.getPlace();
-            if (place && place.formatted_address) {
-                setEndLocation(place.formatted_address);
-            } else {
-                toast.error('Invalid destination');
-            }
-        }
-    };
+            // Set the updated trackpoints in state
+            setTrackPoints(refreshedTrackPoints);
 
-    const calculateRoute = () => {
-        if (!startLocation || !endLocation) {
-            toast.error('Please select both starting point and destination');
             return;
         }
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you really want to delete this?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        });
 
-        const directionsService = new window.google.maps.DirectionsService();
-        directionsService.route(
+        if (result.isConfirmed) {
+            try {
+                // Delete track point from the database
+                await fetch(`http://localhost:3001/guide/daily-distances/${trackPoints[index].id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ selectedDay: selectedDay, TripID: selectedTrip.TripID })
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            // Show success message using swal
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted Successfully',
+                                text: 'Locations deleted successfully.',
+                            }).then(() => {
+                                // Update frontend state to remove the track point
+                                const updatedTrackPoints = trackPoints.filter((_, i) => i !== index);
+
+                                // Refresh the IDs of the remaining trackpoints
+                                const refreshedTrackPoints = updatedTrackPoints.map((point, i) => {
+                                    return {
+                                        ...point,
+                                        id: i
+                                    };
+                                });
+
+                                // Set the updated trackpoints in state
+                                setTrackPoints(refreshedTrackPoints);
+                                // Switch to the dailyDistance tab
+                                handleTabClick('dailyDistance');
+                            });
+                        } else {
+                            throw new Error('Failed to delete track point');
+                        }
+                    });
+
+            } catch (error) {
+                console.error('Error deleting track point:', error);
+            }
+        }
+    };
+
+
+    useEffect(() => {
+        if (!selectedDay) return; // Ensure selectedDay is not null or undefined
+
+        // Perform fetch request to get track points data based on selectedDay
+        fetchTrackPoints(selectedDay)
+            .then((data) => {
+                // Map the received data to generate trackpoint objects
+                const trackpoints = data.map((item, index) => {
+                    const id = index;
+                    const location1 = JSON.parse(item.StartPlace);
+                    const location2 = JSON.parse(item.EndPlace);
+                    const distance = item.Distance;
+                    const submitted = true;
+
+                    return { id, location1, location2, distance, submitted };
+                });
+
+                // Set the trackpoints state
+                setTrackPoints(trackpoints);
+            })
+            .catch((error) => {
+                console.error('Error fetching track points:', error);
+            });
+    }, [selectedDay]);
+
+    // Function to fetch track points data from the server
+    const fetchTrackPoints = async (selectedDay) => {
+        try {
+            const response = await fetch(`http://localhost:3001/guide/track-points?selectedDay=${selectedDay}&TripID=${selectedTrip.TripID}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch track points data');
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    };
+
+
+
+    const updateTrackPoint = (id, locationKey, value) => {
+        const updatedTrackPoints = trackPoints.map((point) =>
+            point.id === id ? { ...point, [locationKey]: value } : point
+        );
+        setTrackPoints(updatedTrackPoints);
+
+        const point = updatedTrackPoints.find(point => point.id === id);
+        if (point.location1.formatted_address && point.location2.formatted_address) {
+            calculateDistance(point.location1.formatted_address, point.location2.formatted_address, id, updatedTrackPoints);
+        }
+    };
+
+    const calculateDistance = (origin, destination, id, updatedTrackPoints) => {
+        const service = new window.google.maps.DistanceMatrixService();
+        service.getDistanceMatrix(
             {
-                origin: startLocation,
-                destination: endLocation,
-                travelMode: window.google.maps.TravelMode.DRIVING,
+                origins: [origin],
+                destinations: [destination],
+                travelMode: 'DRIVING',
             },
-            (result, status) => {
-                if (status === window.google.maps.DirectionsStatus.OK) {
-                    setDirectionsResponse(result);
-                    const distance = result.routes[0].legs[0].distance.value / 1000; // distance in km
-                    //const price = calculatePrice(distance);
-                    setTripPrice(distance);
+            (response, status) => {
+                if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
+                    const distance = response.rows[0].elements[0].distance.value / 1000; // distance in kilometers
+                    const finalTrackPoints = updatedTrackPoints.map((point) =>
+                        point.id === id ? { ...point, distance } : point
+                    );
+                    setTrackPoints(finalTrackPoints);
+                    handleSubmit(finalTrackPoints.find(point => point.id === id));
                 } else {
-                    toast.error('Could not calculate route');
+                    console.error('Error calculating distance', response);
                 }
             }
         );
     };
+
+    const handleSubmit = async (point) => {
+        // Submit the track point to the server or database here
+        try {
+            console.log(selectedDay);
+            const response = await fetch('http://localhost:3001/guide/daily-distances', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    TripID: selectedTrip.TripID,
+                    selectedDay: selectedDay,
+                    StartPlace: point.location1,
+                    EndPlace: point.location2,
+                    Distance: point.distance,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to submit track point');
+            }
+
+            const responseData = await response.json();
+            console.log('Submitted track point:', responseData);
+
+            // Mark the track point as submitted
+            const updatedTrackPoints = trackPoints.map((tp) => {
+                if (tp.id === point.id) {
+                    // Update the properties you need to modify
+                    return {
+                        ...tp,
+                        submitted: true,
+                        location1: point.location1, // Assuming updatedLocation1 is the new value for location1
+                        location2: point.location2,
+                        distance: point.distance,// Assuming updatedLocation2 is the new value for location2
+                        /* other properties you need to update */
+                    };
+                } else {
+                    return tp;
+                }
+            });
+            setTrackPoints(updatedTrackPoints);
+        } catch (error) {
+            console.error('Error submitting track point:', error);
+        }
+    };
+
 
     useEffect(() => {
         const fetchCurrentUser = async () => {
             try {
                 const response = await instance.get('/auth/current-user');
                 setCurrentUser(response.data.user);
+                const res = await instance.get(`/guide/getGuideId/${response.data.user.id}`);
+                setGuideID(res.data[0].GuideID);
                 try {
                     const GuideID = response.data.user.id;
-                    const res = await instance.get(`/trip/guide/${GuideID}`);
-                    setAllocatedTrips(res.data);
+                    const res = await instance.get(`/trip/tripcustomer/${GuideID}`);
+                    const pendingTrips = res.data.filter(trip =>
+                        trip.Status === 'Pending' || trip.Status === 'Advanced' || trip.Status === 'Active'
+                    );
+                    setAllocatedTrips(pendingTrips);
+
                 } catch (error) {
                     console.error('Error fetching allocated trips:', error);
                     toast.error('Failed to fetch allocated trips');
@@ -131,6 +289,7 @@ const CurrentTrips = () => {
 
     const handleTabClick = (tab) => {
         setCurrentTab(tab);
+        setSelectedDay(null);
     };
 
     const handleModalToggle = (trip) => {
@@ -139,6 +298,7 @@ const CurrentTrips = () => {
     };
 
     const handleNestedModalToggle = (trip) => {
+        setSelectedTrip(trip);
         const startDate = new Date(trip.StartDate);
         const endDate = new Date(trip.EndDate);
         const dateArray = [];
@@ -150,83 +310,197 @@ const CurrentTrips = () => {
             currentDate.setDate(currentDate.getDate() + 1);
         }
         setTripDays(dateArray);
-        console.log(dateArray);
         setShowNestedModal(!showNestedModal);
     };
 
     const handleclose = () => {
         setShowNestedModal(!showNestedModal);
-        window.location.reload();
+        setTrackPoints([]);
+        setSelectedDay(null);
+        setUploadedFiles([]);
+        setSelectedTrip([]);
+        //window.location.reload();
     }
 
+    const isValidDate = (date) => {
+        return date instanceof Date && !isNaN(date);
+    };
+
+    useEffect(() => {
+        setTrackPoints([]);
+    }, [selectedDay]);
+
     // Content to render for each day
-    const renderDayContent = (date) => {
-        const formattedDate = `${date.getMonth() + 1}/${date.getDate()}`;
+    const renderDayContent = () => {
+        const totalDistance = trackPoints.reduce((total, point) => total + point.distance, 0);
+
         return (
             <div>
-                {/* <LoadScript googleMapsApiKey="AIzaSyAVBI86obkebwHt55zzGlgU8rC6V9h8C4A" libraries={libraries} onLoad={handleLoad}>
-                    {isLoaded && (
-                        // Your Autocomplete component and other code here
-                        <Autocomplete
-                            onLoad={(autocomplete) => (startAutocomplete.current = autocomplete)}
-                            onPlaceChanged={onStartPlaceChanged}
-                            options={{
-                                types: ['(regions)'],
-                                componentRestrictions: { country: 'LK' }
-                            }}
-                        >
-                            <input
-                                type="text"
-                                placeholder="Enter starting point"
-                                className="input input-bordered w-full mb-4"
-                            />
-                        </Autocomplete>
-                    )}
-                </LoadScript> */}
+                <p className='mb-5'>Total Daily Distance: {totalDistance.toFixed(2)} km</p>
                 {trackPoints.map((point, index) => (
-                    <div key={index} className="mb-4 flex items-center">
-                        <LoadScript googleMapsApiKey="AIzaSyAVBI86obkebwHt55zzGlgU8rC6V9h8C4A" libraries={libraries} onLoad={handleLoad}>
-                            {isLoaded && (
-                                <React.Fragment>
-                                    {/* Autocomplete for starting point */}
-                                    <Autocomplete
-                                        onLoad={(autocomplete) => (startAutocomplete[index] = autocomplete)}
-                                        onPlaceChanged={() => onStartPlaceChanged(index)}
-                                    >
-                                        <input
-                                            type="text"
-                                            placeholder="Enter starting point"
-                                            className="input input-bordered w-full mr-4"
-                                        />
-                                    </Autocomplete>
-                                    {/* Autocomplete for ending point */}
-                                    <Autocomplete
-                                        onLoad={(autocomplete) => (endAutocomplete[index] = autocomplete)}
-                                        onPlaceChanged={() => onEndPlaceChanged(index)}
-                                    >
-                                        <input
-                                            type="text"
-                                            placeholder="Enter ending point"
-                                            className="input input-bordered w-full mr-4"
-                                        />
-                                    </Autocomplete>
-                                </React.Fragment>
-                            )}
-                        </LoadScript>
-                        {/* Delete button for removing track point */}
-                        {index !== 0 &&
-                            <button onClick={() => handleDeleteTrackPoint(index)} className="btn btn-error">
+                    <div key={index} className="flex justify-between mb-4">
+                        <div className="flex justify-around w-[77%]">
+                            <AutocompleteInput
+                                id={`autocomplete1-${point.id}`}
+                                placeholder="Enter Start location"
+                                onPlaceSelected={(place) => updateTrackPoint(point.id, 'location1', place)}
+                                disabled={point.submitted}
+                                value={point.location1.name || ''}
+                            />
+                            <AutocompleteInput
+                                id={`autocomplete2-${point.id}`}
+                                placeholder="Enter End location"
+                                onPlaceSelected={(place) => updateTrackPoint(point.id, 'location2', place)}
+                                disabled={point.submitted}
+                                value={point.location2.name || ''}
+                            />
+                        </div>
+                        <div>
+                            <button onClick={() => handleDeleteTrackPoint(index)} className="btn btn-error w-[80%] ">
                                 Delete
                             </button>
-                        }
+                        </div>
+                        <div className='flex-col'>
+                            <div><p>Distance:</p></div>
+                            <div><p>{point.distance.toFixed(2)} km</p></div>
+                        </div>
                     </div>
                 ))}
-                <button onClick={handleAddTrackPoint} className="btn btn-primary">
+                <button
+                    disabled={!isValidDate(selectedDay)}
+                    onClick={handleAddTrackPoint}
+                    className="btn btn-primary mr-3"
+                >
                     Add Track Point
                 </button>
+                {/* <button disabled={!trackPoints || trackPoints.length === 0} className="btn bg-[#228713] text-white">
+                    Submit locations
+                </button> */}
+
             </div>
-        )
+        );
     };
+
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [uploadedFiles, setUploadedFiles] = useState([]);
+
+    // Function to handle file selection
+    const handleFileChange = (event) => {
+        setSelectedFiles(Array.from(event.target.files));
+    };
+
+    const uploadFiles = async () => {
+        if (selectedFiles && selectedFiles.length > 0) {
+            try {
+                const formData = new FormData();
+                formData.append('GuideID', guideID);
+                formData.append('TripID', selectedTrip.TripID);
+                selectedFiles.forEach((file) => {
+                    formData.append('files', file);
+                });
+
+                for (let pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+
+                const response = await fetch('http://localhost:3001/guide/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to upload files');
+                }
+
+                console.log('Files uploaded successfully');
+
+                // Display success message using Swal
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Upload Successful',
+                    text: 'Files uploaded successfully.',
+                }).then(() => {
+                    // Reload the window after the success message is closed
+                    window.location.reload();
+                });
+
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Upload Error',
+                    text: 'Failed to upload files. Please try again later.',
+                });
+            }
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'No Files Selected',
+                text: 'Please select one or more files to upload.',
+            });
+        }
+    };
+
+    const fetchUploadedFiles = async () => {
+        try {
+            const response = await fetch(`http://localhost:3001/guide/files/${selectedTrip.TripID}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch files');
+            }
+
+            const files = await response.json();
+            setUploadedFiles(files);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
+    const deleteFile = async (filename) => {
+        // Show confirmation dialog using SweetAlert
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You are about to delete this file. This action cannot be undone.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`http://localhost:3001/guide/files/${selectedTrip.TripID}/${filename}`, {
+                        method: 'DELETE',
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to delete file');
+                    }
+
+                    console.log('File deleted successfully');
+                    fetchUploadedFiles();
+
+                    // Display success message using Swal
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'File deleted successfully',
+                    }).then(() => {
+                        // Reload the window
+                        window.location.reload();
+                    });
+
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+        });
+    };
+
+    useEffect(() => {
+        if (Object.keys(selectedTrip).length > 0) {
+            fetchUploadedFiles();
+        }
+    }, [selectedTrip]);
 
     return (
         <div className='flex flex-row'>
@@ -234,25 +508,28 @@ const CurrentTrips = () => {
                 <AdminNavBar activeItem={"currenttrips"} />
             </div>
             <div className="w-[2px] bg-[#F69412]"></div>
-            <div className='bg-[#EFEFEF] w-full'>
+            <div className='bg-[#EFEFEF] w-full overflow-auto h-screen'>
                 <div className='bg-[#D9D9D9] flex items-center h-[8%]  pl-5'>
                     <h1 className="text-2xl font-semibold">Current Trips</h1>
                 </div>
-                <div className='h-[92%] p-8'>
+                <div className='mb-5 p-4'>
                     <div className='flex-col mt-10 px-5'>
                         {allocatedTrips.length === 0 ? (
-                            <div className="text-gray-500 text-lg">No pending orders found</div>
+                            <div className="text-gray-500 text-lg">No Ongoing orders found</div>
                         ) : (
                             allocatedTrips.map(trip => (
-                                <div key={trip.TripID} className="flex flex-col w-full mb-4 p-4 bg-white rounded-lg shadow-md">
+                                <div key={trip.TripID} className={`flex flex-col w-full mb-4 p-4 bg-white rounded-lg shadow-md ${trip.Status === 'Active' ? 'border-4 border-[#ff9500]' : ''}`}>
                                     <div className="flex items-center">
                                         <div className="ml-8 mr-[60px] space-y-3 w-[50%]">
                                             <div>Trip ID: {trip.TripID}</div>
-                                            <div>Customer Name: {trip.name}</div>
-                                            <div>Start Date: {formatDate(trip.StartDate)}</div>
-                                            <div>End Date: {formatDate(trip.EndDate)}</div>
-                                            <div>Adults Count: {trip.AdultsCount}</div>
-                                            <div>Children Count: {trip.ChildrenCount}</div>
+                                            <div>Customer Name: <b>{trip.FirstName} {trip.LastName}</b></div>
+                                            <div>Customer Email: <b>{trip.Email}</b> </div>
+                                            <div>Customer Phone: <b>{trip.PhoneNumber}</b></div>
+                                            <div>Customer Country: <b>{trip.Country}</b></div>
+                                            <div>Start Date: <b>{formatDate(trip.StartDate)}</b></div>
+                                            <div>End Date: <b>{formatDate(trip.EndDate)}</b></div>
+                                            <div>Adults Count: <b>{trip.AdultsCount}</b></div>
+                                            <div>Children Count: <b>{trip.ChildrenCount}</b></div>
                                         </div>
                                         <Divider orientation="vertical" flexItem />
                                         <div className="flex mx-8 w-[40%] justify-center">
@@ -263,14 +540,16 @@ const CurrentTrips = () => {
                                             <div className="flex space-x-10 items-center">
                                                 <div className='inline-flex flex-col space-y-3'>
                                                     <button className="bg-[#39069e] text-white px-4 py-2 rounded-xl" onClick={() => handleModalToggle(trip)}>More Details</button>
-                                                    <button className="bg-[#198061] text-white px-4 py-2 rounded-xl" onClick={() => handleNestedModalToggle(trip)}>View Trip</button>
+                                                    {trip.Status === 'Active' &&
+                                                        <button className="bg-[#198061] text-white px-4 py-2 rounded-xl" onClick={() => handleNestedModalToggle(trip)}>View Trip</button>
+                                                    }
                                                 </div>
                                             </div>
                                         </div>
                                         <Divider orientation="vertical" flexItem />
                                         <div className="mx-9 flex justify-center">
                                             <div className="flex items-center justify-center">
-                                                <button className="bg-[green] text-white px-4 py-2 rounded-full">{trip.Status}</button>
+                                                <button className="bg-[green] text-white px-4 py-2 rounded-full">{trip.Status === 'Pending' || trip.Status === 'Advanced' ? 'Pending' : trip.Status}</button>
                                             </div>
                                         </div>
                                     </div>
@@ -299,7 +578,7 @@ const CurrentTrips = () => {
 
             {showNestedModal && (
                 <div className="modal modal-open">
-                    <div className="modal-box max-w-3xl">
+                    <div className="modal-box max-w-3xl overflow-hidden flex flex-col">
                         <h2 className="font-bold text-lg mb-2">Additional Trip Details</h2>
                         <div className="flex mt-4 mb-6 space-x-3">
                             <Tab
@@ -313,17 +592,27 @@ const CurrentTrips = () => {
                                 onClick={() => handleTabClick('addBills')}
                             />
                         </div>
-                        <div className="p-4">
+                        <div className="px-4 overflow-auto max-h-[80vh]">
                             {currentTab === 'dailyDistance' && (
                                 <div>
+                                    <div className='mb-5'>
+                                        <p>Total Distance: {totalDistance !== null ? totalDistance.toFixed(2) + ' km' : 'N/A'}</p>
+                                    </div>
                                     <div>
                                         <label htmlFor="date-dropdown" className="block font-semibold mb-2">Select a Date</label>
-                                        <select id="date-dropdown" className="input input-bordered w-full" onChange={(e) => setSelectedDay(new Date(e.target.value))}>
+                                        <select
+                                            id="date-dropdown"
+                                            className="input input-bordered w-full"
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                setSelectedDay(value ? new Date(value) : null);
+                                            }}
+                                            value={selectedDay ? selectedDay.toISOString().split('T')[0] : ''}
+                                        >
                                             <option value="">Select</option>
                                             {/* Map through tripDays to create options for each date */}
                                             {tripDays.map((dateObj, index) => (
                                                 <option key={index} value={dateObj.date.toISOString().split('T')[0]}>
-                                                    {/* Include year in the formatted date */}
                                                     {dateObj.date.getFullYear()}/{dateObj.date.getMonth() + 1}/{dateObj.date.getDate()}
                                                 </option>
                                             ))}
@@ -331,17 +620,43 @@ const CurrentTrips = () => {
                                     </div>
 
                                     <div className='mt-8'>
-                                        {selectedDay && renderDayContent(selectedDay)}
+                                        {selectedDay && renderDayContent()}
                                     </div>
                                 </div>
                             )}
                             {currentTab === 'addBills' && (
-                                <div>
-                                    {/* Add logic for adding bills */}
-                                    {/* Example: */}
-                                    <input type="text" placeholder="Enter bill details" />
-                                    <button>Add Bill</button>
-                                </div>
+                                <>
+                                    <div className='flex-col'>
+                                        <div className='mb-4'>
+                                            <input className="bg-[#b0b0b0dc] rounded-lg" type="file" accept="image/jpeg, image/jpg, image/png, application/pdf" multiple onChange={handleFileChange} />
+                                        </div>
+                                        <button className="bg-[#00867d] text-white px-4 py-2 rounded-lg" onClick={uploadFiles}>Upload Bills</button>
+                                    </div>
+                                    <div>
+                                        <h3 className='font-bold mt-8'>Uploaded Files</h3>
+                                        <ul>
+                                            <div className='mt-5'>
+                                                {uploadedFiles.map((file, index) => (
+                                                    <div className="card" key={index}>
+                                                        <div className="card-body">
+                                                            <h5 className="card-title">{file.name}</h5>
+                                                            {file.name.toLowerCase().endsWith('.pdf') ? (
+                                                                <iframe src={file.url} width="100%" height="250px"></iframe>
+                                                            ) : (file.name.toLowerCase().endsWith('.png') || file.name.toLowerCase().endsWith('.jpg') || file.name.toLowerCase().endsWith('.jpeg')) ? (
+                                                                <img src={file.url} alt="Image Preview" style={{ width: '60%', height: '200px' }} />
+                                                            ) : (
+                                                                <p>Unsupported file type</p>
+                                                            )}
+                                                            <button className="btn btn-danger w-[100%] bg-[#8f0707] text-white" onClick={() => deleteFile(file.name)}>Delete</button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+
+                                            </div>
+
+                                        </ul>
+                                    </div>
+                                </>
                             )}
                         </div>
                         <div className="modal-action">
