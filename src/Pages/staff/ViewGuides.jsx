@@ -86,6 +86,7 @@ const ViewGuides = () => {
                         </tbody>
                     </table>
                 )}
+
             </div>
         </div>
     );

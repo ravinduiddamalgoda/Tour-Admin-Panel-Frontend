@@ -20,8 +20,7 @@ const ViewHotels = () => {
     const fetchHotels = async () => {
         try {
             const response = await instance.get('/hotel/');
-            // console.log(response.data);
-            setHotels(response.data.hotels || []); // Ensure that hotels is an array
+            setHotels(response.data.hotels);
         } catch (error) {
             console.error('Error fetching hotels:', error);
         }
