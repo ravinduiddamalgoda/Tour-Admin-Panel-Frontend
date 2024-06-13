@@ -42,7 +42,6 @@ const OnGoingTrip = () => {
     const fetchPaidAmount = async (tripId) => {
         try {
             const response = await instance.get(`/customerPayment/getTotalPaymentByTripID/${tripId}`);
-            console.log(response)
             setPaidAmounts(prevState => ({
                 ...prevState,
                 [tripId]: response.data.TotalPayment
@@ -151,13 +150,6 @@ const OnGoingTrip = () => {
         }
 
         try {
-            const paymentData = {
-                TripID: selectedTrip.TripID,
-                Amount: paymentAmount,
-                Date: new Date().toISOString().split('T')[0], // Today's date
-                PaymentType: paymentType,
-                TransactionNo: transactionNo
-            };
             const pdfBlob = generatePDF();
             const formData = new FormData();
             formData.append('TripID', selectedTrip.TripID);
@@ -180,7 +172,6 @@ const OnGoingTrip = () => {
             toast.error('Error submitting payment');
         }
     };
-
 
     return (
         <div className='flex flex-row'>
@@ -224,14 +215,11 @@ const OnGoingTrip = () => {
                                         >   
                                             <option value="">Select Status</option>
                                             {trip.Status === 'end' && <option value="close">Close</option>}
-                                            {trip.Status === 'Active' ? <option value="end">End</option> : null}
-                                            {/* <option value="end">End</option>
-                                            <option value="close">Close</option> */}
-                                            {/* <option value="Completed">Completed</option> */}
+                                            {trip.Status === 'Active' && <option value="end">End</option>}
                                         </select>
                                         <button
                                             onClick={() => handleStatusChange(trip.TripID)}
-                                            className={`bg-blue-500 text-white px-2 py-1 rounded mr-2 ${trip.Status === 'Active'|| trip.Status === 'Pending'  ? 'cursor-not-allowed' : ''}`}
+                                            className={`bg-blue-500 text-white px-2 py-1 rounded mr-2 ${trip.Status === 'Active' || trip.Status === 'Pending' ? 'cursor-not-allowed' : ''}`}
                                         >
                                             Update Status
                                         </button>
@@ -279,7 +267,7 @@ const OnGoingTrip = () => {
                                 required
                             >
                                 <option value="">Select Payment Type</option>
-                                <option value="Advanced">Advance Payment</option>
+                                <option value="Advance">Advance Payment</option>
                                 <option value="Balance">Balance Payment</option>
                                 <option value="Full">Full Payment</option>
                             </select>
@@ -310,107 +298,104 @@ const OnGoingTrip = () => {
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
 
+            <input type="checkbox" id="update-modal" className="modal-toggle" />
+            <div className="modal">
+                <div className="modal-box">
+                    <h2 className="text-xl font-semibold mb-4">Update Trip</h2>
+                    <form onSubmit={handleUpdateSubmit}>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Price</label>
+                            <input
+                                type="number"
+                                name="Price"
+                                value={tripData.Price}
+                                onChange={handleInputChange}
+                                className="border rounded bg-white p-2 w-full"
+                                required
+                            />
                         </div>
-                    </div>
-
-                    <input type="checkbox" id="update-modal" className="modal-toggle" />
-                    <div className="modal">
-                        <div className="modal-box">
-                            <h2 className="text-xl font-semibold mb-4">Update Trip</h2>
-                            <form onSubmit={handleUpdateSubmit}>
-                                <div className="mb-4">
-                                    <label className="block text-gray-700">Price</label>
-                                    <input
-                                        type="number"
-                                        name="Price"
-                                        value={tripData.Price}
-                                        onChange={handleInputChange}
-                                        className="border rounded bg-white p-2 w-full"
-                                        required
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-gray-700">Start Date</label>
-                                    <input
-                                        type="date"
-                                        name="StartDate"
-                                        value={tripData.StartDate}
-                                        onChange={handleInputChange}
-                                        className="border rounded bg-white p-2 w-full"
-                                        required
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-gray-700">End Date</label>
-                                    <input
-                                        type="date"
-                                        name="EndDate"
-                                        value={tripData.EndDate}
-                                        onChange={handleInputChange}
-                                        className="border rounded bg-white p-2 w-full"
-                                        required
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-gray-700">Adults Count</label>
-                                    <input
-                                        type="number"
-                                        name="AdultsCount"
-                                        value={tripData.AdultsCount}
-                                        onChange={handleInputChange}
-                                        className="border rounded bg-white p-2 w-full"
-                                        required
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-gray-700">Children Count</label>
-                                    <input
-                                        type="number"
-                                        name="ChildrenCount"
-                                        value={tripData.ChildrenCount}
-                                        onChange={handleInputChange}
-                                        className="border rounded bg-white p-2 w-full"
-                                        required
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-gray-700">Description</label>
-                                    <textarea
-                                        name="Description"
-                                        value={tripData.Description}
-                                        onChange={handleInputChange}
-                                        className="border rounded bg-white p-2 w-full"
-                                        required
-                                    ></textarea>
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-gray-700">Special Notes</label>
-                                    <textarea
-                                        name="SpecialNotes"
-                                        value={tripData.SpecialNotes}
-                                        onChange={handleInputChange}
-                                        className="border rounded bg-white p-2 w-full"
-                                    ></textarea>
-                                </div>
-                                <div className="flex justify-end">
-                                    <button
-                                        type="button"
-                                        onClick={() => document.getElementById('update-modal').checked = false}
-                                        className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="bg-blue-500 text-white px-4 py-2 rounded"
-                                    >
-                                        Update Trip
-                                    </button>
-                                </div>
-                            </form>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Start Date</label>
+                            <input
+                                type="date"
+                                name="StartDate"
+                                value={tripData.StartDate}
+                                onChange={handleInputChange}
+                                className="border rounded bg-white p-2 w-full"
+                                required
+                            />
                         </div>
-                    </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">End Date</label>
+                            <input
+                                type="date"
+                                name="EndDate"
+                                value={tripData.EndDate}
+                                onChange={handleInputChange}
+                                className="border rounded bg-white p-2 w-full"
+                                required
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Adults Count</label>
+                            <input
+                                type="number"
+                                name="AdultsCount"
+                                value={tripData.AdultsCount}
+                                onChange={handleInputChange}
+                                className="border rounded bg-white p-2 w-full"
+                                required
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Children Count</label>
+                            <input
+                                type="number"
+                                name="ChildrenCount"
+                                value={tripData.ChildrenCount}
+                                onChange={handleInputChange}
+                                className="border rounded bg-white p-2 w-full"
+                                required
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Description</label>
+                            <textarea
+                                name="Description"
+                                value={tripData.Description}
+                                onChange={handleInputChange}
+                                className="border rounded bg-white p-2 w-full"
+                                required
+                            ></textarea>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Special Notes</label>
+                            <textarea
+                                name="SpecialNotes"
+                                value={tripData.SpecialNotes}
+                                onChange={handleInputChange}
+                                className="border rounded bg-white p-2 w-full"
+                            ></textarea>
+                        </div>
+                        <div className="flex justify-end">
+                            <button
+                                type="button"
+                                onClick={() => document.getElementById('update-modal').checked = false}
+                                className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="bg-blue-500 text-white px-4 py-2 rounded"
+                            >
+                                Update Trip
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
