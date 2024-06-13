@@ -183,137 +183,134 @@ const OnGoingTrip = () => {
 
 
     return (
-        <div className="flex flex-row">
-            <div className="w-[25%]">
-                <StaffSideBar activeItem="ongoingtrip" />
+        <div className='flex flex-row'>
+            <StaffSideBar activeItem="ongoingtrip" />
+            <div className='flex-grow p-4'>
+                <ToastContainer />
+                <h1 className="text-2xl font-semibold mb-4">Ongoing Trips</h1>
+                {ongoingTrips.length === 0 ? (
+                    <p>No ongoing trips found.</p>
+                ) : (
+                    <table className="min-w-full bg-white border">
+                        <thead>
+                            <tr>
+                                <th className="py-2 px-4 border">Trip ID</th>
+                                <th className="py-2 px-4 border">Customer ID</th>
+                                <th className="py-2 px-4 border">Guide ID</th>
+                                <th className="py-2 px-4 border">Start Date</th>
+                                <th className="py-2 px-4 border">End Date</th>
+                                <th className="py-2 px-4 border">Status</th>
+                                <th className="py-2 px-4 border">Price</th>
+                                <th className="py-2 px-4 border">Paid Amount</th>
+                                <th className="py-2 px-4 border">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {ongoingTrips.map(trip => (
+                                <tr key={trip.TripID}>
+                                    <td className="py-2 px-4 border">{trip.TripID}</td>
+                                    <td className="py-2 px-4 border">{trip.CustomerID}</td>
+                                    <td className="py-2 px-4 border">{trip.GuideID}</td>
+                                    <td className="py-2 px-4 border">{trip.StartDate.split('T')[0]}</td>
+                                    <td className="py-2 px-4 border">{trip.EndDate.split('T')[0]}</td>
+                                    <td className="py-2 px-4 border">{trip.Status}</td>
+                                    <td className="py-2 px-4 border">{trip.Price}</td>
+                                    <td className="py-2 px-4 border">{paidAmounts[trip.TripID] || 'Loading...'}</td>
+                                    <td className="py-2 px-4 border">
+                                        <select
+                                            value={status}
+                                            onChange={(e) => setStatus(e.target.value)}
+                                            className="mr-2 border bg-white rounded p-1"
+                                        >   
+                                            <option value="">Select Status</option>
+                                            {trip.Status === 'end' && <option value="close">Close</option>}
+                                            {trip.Status === 'Active' ? <option value="end">End</option> : null}
+                                            {/* <option value="end">End</option>
+                                            <option value="close">Close</option> */}
+                                            {/* <option value="Completed">Completed</option> */}
+                                        </select>
+                                        <button
+                                            onClick={() => handleStatusChange(trip.TripID)}
+                                            className={`bg-blue-500 text-white px-2 py-1 rounded mr-2 ${trip.Status === 'Active'|| trip.Status === 'Pending'  ? 'cursor-not-allowed' : ''}`}
+                                        >
+                                            Update Status
+                                        </button>
+                                        <button
+                                            onClick={() => openPaymentModal(trip)}
+                                            className="bg-green-500 text-white px-2 py-1 rounded"
+                                        >
+                                            Payment
+                                        </button>
+                                        <button
+                                            onClick={() => openUpdateModal(trip)}
+                                            className="bg-yellow-500 text-white px-2 py-1 rounded"
+                                        >
+                                            Update Trip
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
             </div>
-            <div className="w-[2px] bg-[#F69412]"></div>
-            <div className='bg-[#EFEFEF] w-full overflow-auto h-screen'>
-                <div className='bg-[#D9D9D9] flex items-center h-[8%]  pl-5'>
-                    <h1 className="text-2xl font-semibold">Ongoing Trips</h1>
-                </div>
-                <div className='mb-5 p-4'>
-                    <div className='flex-col mt-10 px-5'>
-                        {ongoingTrips.length === 0 ? (
-                            <p>No ongoing trips found.</p>
-                        ) : (
-                            <table className="min-w-full bg-white border">
-                                <thead>
-                                    <tr>
-                                        <th className="py-2 px-4 border">Trip ID</th>
-                                        <th className="py-2 px-4 border">Customer ID</th>
-                                        <th className="py-2 px-4 border">Guide ID</th>
-                                        <th className="py-2 px-4 border">Start Date</th>
-                                        <th className="py-2 px-4 border">End Date</th>
-                                        <th className="py-2 px-4 border">Status</th>
-                                        <th className="py-2 px-4 border">Price</th>
-                                        <th className="py-2 px-4 border">Paid Amount</th>
-                                        <th className="py-2 px-4 border">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {ongoingTrips.map(trip => (
-                                        <tr key={trip.TripID}>
-                                            <td className="py-2 px-4 border">{trip.TripID}</td>
-                                            <td className="py-2 px-4 border">{trip.CustomerID}</td>
-                                            <td className="py-2 px-4 border">{trip.GuideID}</td>
-                                            <td className="py-2 px-4 border">{trip.StartDate.split('T')[0]}</td>
-                                            <td className="py-2 px-4 border">{trip.EndDate.split('T')[0]}</td>
-                                            <td className="py-2 px-4 border">{trip.Status}</td>
-                                            <td className="py-2 px-4 border">{trip.Price}</td>
-                                            <td className="py-2 px-4 border">{paidAmounts[trip.TripID] || 'Loading...'}</td>
-                                            <td className="py-2 px-4 border">
-                                                <select
-                                                    value={status}
-                                                    onChange={(e) => setStatus(e.target.value)}
-                                                    className="mr-2 border bg-white rounded p-1"
-                                                >
-                                                    <option value="">Select Status</option>
-                                                    <option value="Cancelled">Cancelled</option>
-                                                    <option value="Started">Started</option>
-                                                    <option value="Completed">Completed</option>
-                                                </select>
-                                                <button
-                                                    onClick={() => handleStatusChange(trip.TripID)}
-                                                    className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
-                                                >
-                                                    Update Status
-                                                </button>
-                                                <button
-                                                    onClick={() => openPaymentModal(trip)}
-                                                    className="bg-green-500 text-white px-2 py-1 rounded"
-                                                >
-                                                    Payment
-                                                </button>
-                                                <button
-                                                    onClick={() => openUpdateModal(trip)}
-                                                    className="bg-yellow-500 text-white px-2 py-1 rounded"
-                                                >
-                                                    Update Trip
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
-                    </div>
 
-                    <input type="checkbox" id="payment-modal" className="modal-toggle" />
-                    <div className="modal">
-                        <div className="modal-box">
-                            <h2 className="text-xl font-semibold mb-4">Customer Payment</h2>
-                            <form onSubmit={handlePaymentSubmit}>
-                                <div className="mb-4">
-                                    <label className="block text-gray-700">Amount</label>
-                                    <input
-                                        type="number"
-                                        value={paymentAmount}
-                                        onChange={(e) => setPaymentAmount(e.target.value)}
-                                        className="border rounded bg-white p-2 w-full"
-                                        required
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-gray-700">Payment Type</label>
-                                    <select
-                                        value={paymentType}
-                                        onChange={(e) => setPaymentType(e.target.value)}
-                                        className="border rounded bg-white p-2 w-full"
-                                        required
-                                    >
-                                        <option value="">Select Payment Type</option>
-                                        <option value="Bank Payment">Bank Payment</option>
-                                        <option value="Cash">Cash</option>
-                                        <option value="Online Transfer">Online Transfer</option>
-                                    </select>
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-gray-700">Transaction Number</label>
-                                    <input
-                                        type="text"
-                                        value={transactionNo}
-                                        onChange={(e) => setTransactionNo(e.target.value)}
-                                        className="border rounded bg-white p-2 w-full"
-                                        required
-                                    />
-                                </div>
-                                <div className="flex justify-end">
-                                    <button
-                                        type="button"
-                                        onClick={() => document.getElementById('payment-modal').checked = false}
-                                        className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="bg-blue-500 text-white px-4 py-2 rounded"
-                                    >
-                                        Submit Payment
-                                    </button>
-                                </div>
-                            </form>
+            <input type="checkbox" id="payment-modal" className="modal-toggle" />
+            <div className="modal">
+                <div className="modal-box">
+                    <h2 className="text-xl font-semibold mb-4">Customer Payment</h2>
+                    <form onSubmit={handlePaymentSubmit}>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Amount</label>
+                            <input
+                                type="number"
+                                value={paymentAmount}
+                                onChange={(e) => setPaymentAmount(e.target.value)}
+                                className="border rounded bg-white p-2 w-full"
+                                required
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Payment Type</label>
+                            <select
+                                value={paymentType}
+                                onChange={(e) => setPaymentType(e.target.value)}
+                                className="border rounded bg-white p-2 w-full"
+                                required
+                            >
+                                <option value="">Select Payment Type</option>
+                                <option value="Advanced">Advance Payment</option>
+                                <option value="Balance">Balance Payment</option>
+                                <option value="Full">Full Payment</option>
+                            </select>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Transaction Number</label>
+                            <input
+                                type="text"
+                                value={transactionNo}
+                                onChange={(e) => setTransactionNo(e.target.value)}
+                                className="border rounded bg-white p-2 w-full"
+                                required
+                            />
+                        </div>
+                        <div className="flex justify-end">
+                            <button
+                                type="button"
+                                onClick={() => document.getElementById('payment-modal').checked = false}
+                                className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="bg-blue-500 text-white px-4 py-2 rounded"
+                            >
+                                Submit Payment
+                            </button>
+                        </div>
+                    </form>
+
                         </div>
                     </div>
 
