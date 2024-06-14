@@ -38,6 +38,9 @@ import Chat from './Components/staff/Chat';
 import InquiryPage from './Pages/customer/InquiryPage';
 import ViewPayment from './Pages/customer/ViewPayment';
 import ViewFeedback from './Pages/customer/ViewFeedback ';
+import AdminOnGoingTrip from './Pages/admin/AdminOnGoingTrip ';
+import AdminPreviousTrips from './Pages/admin/AdminPreviousTrips';
+import ViewGuidesAdmin from './Pages/admin/ViewGuidesAdmin';
 
 
 function App() {
@@ -66,7 +69,11 @@ function App() {
           <Route path='/admin/feedback' element={<FeedbackPage/>}/>
           <Route path='/admin/hotel' element={<HotelManagement/>}/>
           <Route path='/admin/payment' element={<PaymentManagement/>}/>
+          <Route path='/admin/ongoing-trip' element={<AdminOnGoingTrip/>}/>
+          <Route path='/admin/previous-trip' element={<AdminPreviousTrips/>}/>
+          <Route path='/admin/guide' element={<ViewGuidesAdmin/>}/>
           <Route path='/admin/tourpackage' element={<TourPackage/>}/>
+
         </Route>
         
         <Route element={<ProtectedGuideRoute/>}>
