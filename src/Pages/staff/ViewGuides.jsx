@@ -7,11 +7,9 @@ import { Formik, Field, Form } from 'formik';
 const ViewGuides = () => {
     const [guides, setGuides] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
-<<<<<<< Updated upstream
     const [filteredGuides, setFilteredGuides] = useState([]);
     const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
-=======
->>>>>>> Stashed changes
+
 
     useEffect(() => {
         fetchGuides();
@@ -35,7 +33,6 @@ const ViewGuides = () => {
         setSearchTerm(event.target.value);
     };
 
-<<<<<<< Updated upstream
     const handleDateSubmit = (values) => {
         setDateRange(values);
         filterGuides();
@@ -53,18 +50,13 @@ const ViewGuides = () => {
         });
         setFilteredGuides(filtered);
     };
-=======
-    const filteredGuides = guides.filter(guide =>
-        guide.EndDate && guide.EndDate.toLowerCase().includes(searchTerm.toLowerCase())
-    );
->>>>>>> Stashed changes
+
 
     return (
         <div className='flex flex-row'>
             <StaffSideBar activeItem="guides" />
             <div className='flex-grow p-4'>
                 <h1 className="text-2xl font-semibold mb-4">Guides</h1>
-<<<<<<< Updated upstream
                 <Formik
                     initialValues={{ startDate: '', endDate: '' }}
                     onSubmit={handleDateSubmit}
@@ -93,12 +85,6 @@ const ViewGuides = () => {
                     <input
                         type="text"
                         placeholder="Search by Name"
-=======
-                <div className="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Search by End Date"
->>>>>>> Stashed changes
                         value={searchTerm}
                         onChange={handleSearch}
                         className="border border-gray-300 bg-white p-2 rounded-md w-full"
@@ -117,15 +103,7 @@ const ViewGuides = () => {
                                 <th className="py-2 px-4 border">Phone Number</th>
                                 <th className="py-2 px-4 border">Vehicle ID</th>
                                 <th className="py-2 px-4 border">Vehicle Type</th>
-<<<<<<< Updated upstream
                                 <th className="py-2 px-4 border">Vehicle Model</th>
-=======
-                                {/* <th className="py-2 px-4 border">Vehicle Model</th>
-                                <th className="py-2 px-4 border">Registration Number</th>
-                                <th className="py-2 px-4 border">Languages</th>
-                                <th className="py-2 px-4 border">Guide Type</th> */}
-                                <th className="py-2 px-4 border">Qualifications</th>
->>>>>>> Stashed changes
                                 <th className="py-2 px-4 border">Start Date</th>
                                 <th className="py-2 px-4 border">End Date</th>
                             </tr>
@@ -141,13 +119,6 @@ const ViewGuides = () => {
                                     <td className="py-2 px-4 border">{guide.VehicleID}</td>
                                     <td className="py-2 px-4 border">{guide.VehicleType}</td>
                                     <td className="py-2 px-4 border">{guide.VehicleModel}</td>
-<<<<<<< Updated upstream
-=======
-                                    {/* <td className="py-2 px-4 border">{guide.RegistrationNumber}</td>
-                                    <td className="py-2 px-4 border">{guide.Languages}</td>
-                                    <td className="py-2 px-4 border">{guide.GuiType}</td>
-                                    <td className="py-2 px-4 border">{guide.Qualifications}</td> */}
->>>>>>> Stashed changes
                                     <td className="py-2 px-4 border">{guide.StartDate.split('T')[0]}</td>
                                     <td className="py-2 px-4 border">{guide.EndDate.split('T')[0]}</td>
                                 </tr>
@@ -155,10 +126,6 @@ const ViewGuides = () => {
                         </tbody>
                     </table>
                 )}
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
             </div>
         </div>
     );
