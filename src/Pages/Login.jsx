@@ -100,7 +100,7 @@ const Login = () => {
         console.log(resRole.data?.user?.role);
         switch (resRole.data?.user?.role) {
           case 'Customer':
-            navigate('/Customer-Dashboard');
+            navigate('/Customer/current-trip');
             break;
           case 'Guide':
             navigate('/guide-dashboard');
