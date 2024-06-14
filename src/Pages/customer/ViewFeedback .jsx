@@ -54,7 +54,9 @@ const ViewFeedback = () => {
 
   return (
     <div className='flex flex-row'>
+        <div className="w-[25%]">
       <Navbar activeItem="view-feedback" />
+      </div>
       <div className='flex-grow p-4'>
         <h1 className="text-2xl font-semibold mb-4">Feedbacks</h1>
         {feedbacks.length === 0 ? (
