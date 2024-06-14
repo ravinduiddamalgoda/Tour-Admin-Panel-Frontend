@@ -36,6 +36,8 @@ import ViewInquiry from './Pages/staff/ViewInquiry';
 import GuidePayments from './Pages/staff/GuidePayment';
 import Chat from './Components/staff/Chat';
 import InquiryPage from './Pages/customer/InquiryPage';
+import ViewPayment from './Pages/customer/ViewPayment';
+import ViewFeedback from './Pages/customer/ViewFeedback ';
 
 
 function App() {
@@ -53,7 +55,9 @@ function App() {
           <Route exact path="/Customer/current-trip" element={<CustomerCurrent />}/>
           <Route exact path="/Customer/previous-trip" element={<CustomerPrevious />}/>
           <Route exact path="/Customer/feedbacks" element={<CustomerFeedback />}/>
-          
+          view-feedbacks
+          <Route exact path="/Customer/view-payment" element={<ViewPayment/>}/>
+          <Route exact path="/Customer/view-feedbacks" element={<ViewFeedback/>}/>
           <Route exact path="/Customer/inquiry" element={<InquiryPage />}/>
         </Route>
         <Route element={<ProtectedAdminRoute/>}>

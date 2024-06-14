@@ -247,8 +247,8 @@ const OnGoingTrip = () => {
                                         >   
 >>>>>>> Stashed changes
                                             <option value="">Select Status</option>
-                                            {trip.Status === 'end' && <option value="close">Close</option>}
-                                            {trip.Status === 'Active' && <option value="end">End</option>}
+                                            {trip.Status === 'End' && <option value="Close">Close</option>}
+                                            {trip.Status === 'Active' && <option value="End">End</option>}
                                         </select>
                                         <button
                                             onClick={() => handleStatusChange(trip.TripID)}
