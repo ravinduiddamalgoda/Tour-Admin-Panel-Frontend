@@ -531,6 +531,12 @@ const PreviousTrips = () => {
                                             <div>End Date: <b>{formatDate(trip.EndDate)}</b></div>
                                             <div>Adults Count: <b>{trip.AdultsCount}</b></div>
                                             <div>Children Count: <b>{trip.ChildrenCount}</b></div>
+                                            {trip.Status === 'Close' &&
+                                                <>
+                                                    <div>Total Distance: <b>{trip.TotalDistance.toFixed(2)} km</b></div>
+                                                    <div>Guide Payment: <b>{trip.GuidePayment} LKR</b></div>
+                                                </>
+                                            }
                                         </div>
                                         <Divider orientation="vertical" flexItem />
                                         <div className="flex mx-8 w-[40%] justify-center">

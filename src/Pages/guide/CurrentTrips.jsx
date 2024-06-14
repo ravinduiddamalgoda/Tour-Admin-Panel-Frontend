@@ -266,7 +266,7 @@ const CurrentTrips = () => {
                     const GuideID = response.data.user.id;
                     const res = await instance.get(`/trip/tripcustomer/${GuideID}`);
                     const pendingTrips = res.data.filter(trip =>
-                        trip.Status === 'Pending' || trip.Status === 'Advanced' || trip.Status === 'Active'
+                        trip.Status === 'Pending' || trip.Status === 'Advanced' || trip.Status === 'Active' || trip.Status === 'Start'
                     );
                     setAllocatedTrips(pendingTrips);
 
@@ -311,6 +311,27 @@ const CurrentTrips = () => {
         }
         setTripDays(dateArray);
         setShowNestedModal(!showNestedModal);
+    };
+
+
+    const handleStart = async (trip) => {
+        try {
+            await instance.put('/trip/updateTripStatus', { TripID: trip.TripID, Status: 'Start' });
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!'
+            }).then(() => {
+                window.location.reload(); // Close the dialog box
+              });
+            // Optionally, update the trip status in the component state or refetch data
+        } catch (error) {
+            console.error('Error updating trip status:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Failed to update trip status.'
+            });
+        }
     };
 
     const handleclose = () => {
@@ -518,7 +539,7 @@ const CurrentTrips = () => {
                             <div className="text-gray-500 text-lg">No Ongoing orders found</div>
                         ) : (
                             allocatedTrips.map(trip => (
-                                <div key={trip.TripID} className={`flex flex-col w-full mb-4 p-4 bg-white rounded-lg shadow-md ${trip.Status === 'Active' ? 'border-4 border-[#ff9500]' : ''}`}>
+                                <div key={trip.TripID} className={`flex flex-col w-full mb-4 p-4 bg-white rounded-lg shadow-md ${trip.Status === 'Start' ? 'border-4 border-[#ff9500]' : ''}`}>
                                     <div className="flex items-center">
                                         <div className="ml-8 mr-[60px] space-y-3 w-[50%]">
                                             <div>Trip ID: {trip.TripID}</div>
@@ -540,9 +561,16 @@ const CurrentTrips = () => {
                                             <div className="flex space-x-10 items-center">
                                                 <div className='inline-flex flex-col space-y-3'>
                                                     <button className="bg-[#39069e] text-white px-4 py-2 rounded-xl" onClick={() => handleModalToggle(trip)}>More Details</button>
-                                                    {trip.Status === 'Active' &&
-                                                        <button className="bg-[#198061] text-white px-4 py-2 rounded-xl" onClick={() => handleNestedModalToggle(trip)}>View Trip</button>
-                                                    }
+                                                    {trip.Status === 'Active' && (
+                                                        <>
+                                                            <button className="bg-[#19b911] text-white px-4 py-2 rounded-xl" onClick={() => handleStart(trip)}>Start Trip</button>
+                                                        </>
+                                                    )}
+                                                    {trip.Status === 'Start' && (
+                                                        <>
+                                                            <button className="bg-[#198061] text-white px-4 py-2 rounded-xl" onClick={() => handleNestedModalToggle(trip)}>View Trip</button>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

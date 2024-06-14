@@ -72,7 +72,7 @@ const Navbar = ({ activeItem }) => {
           <div className={`mt-6 border border-[#DADADA] w-[85%] h-[60px] flex items-center ${activeLink === "currenttrips" ? 'bg-[#FFEEEF] border-transparent' : 'hover:bg-[#FFEEEF]'} rounded-lg`}>
             <button onClick={handleLinkClick('currenttrips')} className='flex items-center w-full'>
             <div className='p-3'><LoopIcon /></div>
-              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Curent Trips</h1>
+              <h1 className='flex-1 text-center overflow-hidden whitespace-nowrap -ml-4 text-[18px]'>Current Trips</h1>
             </button>
           </div>
 

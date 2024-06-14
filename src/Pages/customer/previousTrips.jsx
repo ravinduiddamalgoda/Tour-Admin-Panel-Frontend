@@ -14,17 +14,24 @@ function PreviousTrips() {
   const [userID, setUserID] = useState(null);
 
   useEffect(() => {
+<<<<<<< Updated upstream
     fetchPreviousTrips();
+=======
+>>>>>>> Stashed changes
     const token = localStorage.getItem('access_token');
     if (token) {
       const decoded = jwtDecode(token);
       setUserID(decoded.id);
+<<<<<<< Updated upstream
+=======
+      fetchPreviousTrips(decoded.id);
+>>>>>>> Stashed changes
     }
   }, []);
 
-  const fetchPreviousTrips = async () => {
+  const fetchPreviousTrips = async (id) => {
     try {
-      const response = await instance.get('/trip/get/getPreviousTrips');
+      const response = await instance.get(`/trip/getPreviousTrips/${id}`);
       setPreviousTrips(response.data);
     } catch (error) {
       console.error('Failed to fetch previous trips:', error);
