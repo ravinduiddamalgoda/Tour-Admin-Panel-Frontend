@@ -14,18 +14,12 @@ function PreviousTrips() {
   const [userID, setUserID] = useState(null);
 
   useEffect(() => {
-<<<<<<< Updated upstream
     fetchPreviousTrips();
-=======
->>>>>>> Stashed changes
     const token = localStorage.getItem('access_token');
     if (token) {
       const decoded = jwtDecode(token);
       setUserID(decoded.id);
-<<<<<<< Updated upstream
-=======
       fetchPreviousTrips(decoded.id);
->>>>>>> Stashed changes
     }
   }, []);
 

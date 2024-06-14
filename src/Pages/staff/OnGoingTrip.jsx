@@ -241,22 +241,14 @@ const OnGoingTrip = () => {
                                             value={status}
                                             onChange={(e) => setStatus(e.target.value)}
                                             className="mr-2 border bg-white rounded p-1"
-<<<<<<< Updated upstream
-                                        >
-=======
                                         >   
->>>>>>> Stashed changes
                                             <option value="">Select Status</option>
                                             {trip.Status === 'End' && <option value="Close">Close</option>}
                                             {trip.Status === 'Active' && <option value="End">End</option>}
                                         </select>
                                         <button
                                             onClick={() => handleStatusChange(trip.TripID)}
-<<<<<<< Updated upstream
                                             className={`bg-blue-500 text-white px-2 py-1 rounded mr-2 ${ trip.Status === 'Pending' ? 'cursor-not-allowed' : 'cursor-default'}`}
-=======
-                                            className={`bg-blue-500 text-white px-2 py-1 rounded mr-2 ${trip.Status === 'Active' || trip.Status === 'Pending' ? 'cursor-not-allowed' : ''}`}
->>>>>>> Stashed changes
                                         >
                                             Update Status
                                         </button>
@@ -353,7 +345,6 @@ const OnGoingTrip = () => {
                                 className="border rounded bg-white p-2 w-full"
                                 required
                             />
-<<<<<<< Updated upstream
                         </div>
                         <div className="mb-4">
                             <label className="block text-gray-700">Start Date</label>
@@ -463,87 +454,6 @@ const OnGoingTrip = () => {
                                 Update Trip
                             </button>
                         </div>
-=======
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700">Start Date</label>
-                            <input
-                                type="date"
-                                name="StartDate"
-                                value={tripData.StartDate}
-                                onChange={handleInputChange}
-                                className="border rounded bg-white p-2 w-full"
-                                required
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700">End Date</label>
-                            <input
-                                type="date"
-                                name="EndDate"
-                                value={tripData.EndDate}
-                                onChange={handleInputChange}
-                                className="border rounded bg-white p-2 w-full"
-                                required
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700">Adults Count</label>
-                            <input
-                                type="number"
-                                name="AdultsCount"
-                                value={tripData.AdultsCount}
-                                onChange={handleInputChange}
-                                className="border rounded bg-white p-2 w-full"
-                                required
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700">Children Count</label>
-                            <input
-                                type="number"
-                                name="ChildrenCount"
-                                value={tripData.ChildrenCount}
-                                onChange={handleInputChange}
-                                className="border rounded bg-white p-2 w-full"
-                                required
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700">Description</label>
-                            <textarea
-                                name="Description"
-                                value={tripData.Description}
-                                onChange={handleInputChange}
-                                className="border rounded bg-white p-2 w-full"
-                                required
-                            ></textarea>
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700">Special Notes</label>
-                            <textarea
-                                name="SpecialNotes"
-                                value={tripData.SpecialNotes}
-                                onChange={handleInputChange}
-                                className="border rounded bg-white p-2 w-full"
-                            ></textarea>
-                        </div>
-                        <div className="flex justify-end">
-                            <button
-                                type="button"
-                                onClick={() => document.getElementById('update-modal').checked = false}
-                                className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                className="bg-blue-500 text-white px-4 py-2 rounded"
-                            >
-                                Update Trip
-                            </button>
-                        </div>
->>>>>>> Stashed changes
                     </form>
                 </div>
             </div>

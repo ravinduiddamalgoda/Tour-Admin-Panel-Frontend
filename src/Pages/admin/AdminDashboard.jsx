@@ -120,20 +120,6 @@ const AdminDashboard = () => {
                                 <h2 className='text-lg text-white font-semibold mb-2'>Total Revenue</h2>
                                 <p className='text-4xl text-white font-bold'>${totalRevenue.toFixed(2)}</p>
                             </div>
-<<<<<<< Updated upstream
-
-                            <div className='flex flex-col'>
-
-                            </div>
-                            <div className='p-4 bg-gray-100 h-80 rounded-lg shadow-md col-span-2'>
-                            <h2 className='text-lg font-semibold mb-2'>Revenue Over Time</h2>
-                            <Bar data={revenueData.length ? revenueChartData : {}} />
-                        </div>
-                        <div className='p-4 bg-gray-100 h-96 rounded-lg shadow-md col-span-2'>
-                            <h2 className='text-lg font-semibold mb-2'>User and Guide Distribution</h2>
-                            <Pie data={userGuideChartData} />
-                        </div>
-=======
                             <div className='p-4 bg-gray-100 h-80 rounded-lg shadow-md col-span-2'>
                                 <h2 className='text-lg font-semibold mb-2'>Revenue Over Time</h2>
                                 {revenueData.length ? <Bar data={revenueChartData} /> : <p>No revenue data available</p>}
@@ -142,7 +128,6 @@ const AdminDashboard = () => {
                                 <h2 className='text-lg font-semibold mb-2'>User and Guide Distribution</h2>
                                 <Pie data={userGuideChartData} />
                             </div>
->>>>>>> Stashed changes
                         </div>
                     </div>
                 </div>
