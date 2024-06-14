@@ -22,11 +22,16 @@ const OnGoingTrip = () => {
         AdultsCount: '',
         ChildrenCount: '',
         Description: '',
-        SpecialNotes: ''
+        SpecialNotes: '',
+        GuideID: ''
     });
+    const [guides, setGuides] = useState([]);
+    const [filteredGuides, setFilteredGuides] = useState([]);
+    const [searchGuide, setSearchGuide] = useState('');
 
     useEffect(() => {
         fetchOngoingTrips();
+        fetchAllGuides(); // Fetch all guides initially
     }, []);
 
     const fetchOngoingTrips = async () => {
@@ -48,6 +53,15 @@ const OnGoingTrip = () => {
             }));
         } catch (error) {
             console.error('Error fetching paid amount:', error);
+        }
+    };
+
+    const fetchAllGuides = async () => {
+        try {
+            const response = await instance.get('/user/getAllGuides');
+            setGuides(response.data);
+        } catch (error) {
+            console.error('Error fetching guides:', error);
         }
     };
 
@@ -76,14 +90,15 @@ const OnGoingTrip = () => {
             AdultsCount: trip.AdultsCount,
             ChildrenCount: trip.ChildrenCount,
             Description: trip.Description,
-            SpecialNotes: trip.SpecialNotes
+            SpecialNotes: trip.SpecialNotes,
+            GuideID: trip.GuideID
         });
         document.getElementById('update-modal').checked = true;
     };
 
     const handleUpdateSubmit = async (e) => {
         e.preventDefault();
-        if (!tripData.Price || !tripData.StartDate || !tripData.EndDate || !tripData.AdultsCount) {
+        if (!tripData.Price || !tripData.StartDate || !tripData.EndDate || !tripData.AdultsCount || !tripData.GuideID) {
             toast.error('Please fill in all required fields');
             return;
         }
@@ -104,6 +119,20 @@ const OnGoingTrip = () => {
             ...prevState,
             [name]: value
         }));
+    };
+
+    const handleGuideSearch = (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        setSearchGuide(searchTerm);
+        if (searchTerm.length > 2) {
+            const filtered = guides.filter(guide => 
+                guide.FirstName.toLowerCase().includes(searchTerm) || 
+                guide.LastName.toLowerCase().includes(searchTerm)
+            );
+            setFilteredGuides(filtered);
+        } else {
+            setFilteredGuides([]);
+        }
     };
 
     const generatePDF = () => {
@@ -212,14 +241,14 @@ const OnGoingTrip = () => {
                                             value={status}
                                             onChange={(e) => setStatus(e.target.value)}
                                             className="mr-2 border bg-white rounded p-1"
-                                        >   
+                                        >
                                             <option value="">Select Status</option>
                                             {trip.Status === 'end' && <option value="close">Close</option>}
                                             {trip.Status === 'Active' && <option value="end">End</option>}
                                         </select>
                                         <button
                                             onClick={() => handleStatusChange(trip.TripID)}
-                                            className={`bg-blue-500 text-white px-2 py-1 rounded mr-2 ${trip.Status === 'Active' || trip.Status === 'Pending' ? 'cursor-not-allowed' : ''}`}
+                                            className={`bg-blue-500 text-white px-2 py-1 rounded mr-2 ${ trip.Status === 'Pending' ? 'cursor-not-allowed' : 'cursor-default'}`}
                                         >
                                             Update Status
                                         </button>
@@ -379,6 +408,36 @@ const OnGoingTrip = () => {
                                 onChange={handleInputChange}
                                 className="border rounded bg-white p-2 w-full"
                             ></textarea>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Select Guide</label>
+                            <input
+                                type="text"
+                                value={searchGuide}
+                                onChange={handleGuideSearch}
+                                className="border rounded bg-white p-2 w-full"
+                                placeholder="Search by guide name"
+                            />
+                            {filteredGuides.length > 0 && (
+                                <ul className="bg-white border rounded mt-2 max-h-48 overflow-y-auto">
+                                    {filteredGuides.map(guide => (
+                                        <li
+                                            key={guide.GuideID}
+                                            onClick={() => {
+                                                setTripData(prevState => ({
+                                                    ...prevState,
+                                                    GuideID: guide.GuideID
+                                                }));
+                                                setFilteredGuides([]);
+                                                setSearchGuide(guide.FirstName + ' ' + guide.LastName);
+                                            }}
+                                            className="p-2 cursor-pointer hover:bg-gray-200"
+                                        >
+                                            {guide.FirstName} {guide.LastName}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
                         <div className="flex justify-end">
                             <button
