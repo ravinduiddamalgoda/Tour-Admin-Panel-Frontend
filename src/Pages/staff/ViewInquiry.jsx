@@ -96,11 +96,11 @@ const ViewInquiry = () => {
           </div>
         </div>
         {showChatModal && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-md p-4 w-full max-w-lg h-3/4 overflow-y-auto">
-              <button className="absolute top-4 right-4 text-red-700 text-3xl font-bold" onClick={() => setShowChatModal(false)}>
-                X
-              </button>
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="bg-white rounded-md p-4 w-full max-w-lg h-3/4 overflow-y-auto relative">
+                  <button className="absolute top-4 right-4 text-[red] font-bold text-xl" onClick={() => setShowChatModal(false)}>
+                    Close
+                  </button>
               <Chat inquiryID={selectedInquiryID} />
             </div>
           </div>

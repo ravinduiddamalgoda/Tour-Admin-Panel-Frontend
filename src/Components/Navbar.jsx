@@ -22,7 +22,7 @@ const Navbar = ({activeItem, buttonState, buttonLoc }) => {
             <Link to="/" className={`p-4 ${activeItem === 'HOME' ? 'border-b-2 border-black' : 'border-b border-transparent opacity-50'} cursor-pointer`} >HOME</Link>
             <Link to="/tours" className={`p-4 ${activeItem === 'TOURS' ? 'border-b-2 border-black' : 'border-b border-transparent opacity-50'} cursor-pointer`} >TOURS</Link>
             <Link to="/about-us" className={`p-4 ${activeItem === 'ABOUT US' ? 'border-b-2 border-black' : 'border-b border-transparent opacity-50'} cursor-pointer`} >ABOUT US</Link>
-            <Link to="/testimonials" className={`p-4 ${activeItem === 'TESTIMONIALS' ? 'border-b-2 border-black' : 'border-b border-transparent opacity-50'} cursor-pointer`} >TESTIMONIALS</Link>
+            {/* <Link to="/testimonials" className={`p-4 ${activeItem === 'TESTIMONIALS' ? 'border-b-2 border-black' : 'border-b border-transparent opacity-50'} cursor-pointer`} >TESTIMONIALS</Link> */}
         </div>
         <div>
             <button onClick={handleClick} className="bg-customYellow hover:bg-customYellow text-white font-bold py-2 px-4 rounded-full">
